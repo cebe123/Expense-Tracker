@@ -139,13 +139,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildBalance() {
-    return const Column(
+    return Column(
       children: [
-        Column(
+        const Column(
           children: [
-            SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 10),
             Text(
               "Total Balance",
               textAlign: TextAlign.center,
@@ -167,13 +165,11 @@ class HomeScreen extends StatelessWidget {
         ),
         Column(
           children: [
-            SizedBox(
-              height: 5,
-            ),
+            const SizedBox(height: 5),
             Text(
-              "Income-Outcome=",
+              total.toStringAsFixed(2),
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w400,
                 fontFamily: 'Roboto',
@@ -186,7 +182,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ],
@@ -194,24 +190,24 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildIncome() {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 15,
+        const SizedBox(
+          width: 5,
         ),
         Row(
           children: [
-            Icon(
+            const Icon(
               CupertinoIcons.arrow_down_circle_fill,
               color: Color.fromRGBO(183, 183, 183, 0.5),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   "Income",
                   style: TextStyle(
                     fontSize: 16,
@@ -228,8 +224,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "₺1000",
-                  style: TextStyle(
+                  "₺${income.toStringAsFixed(2)}",
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Roboto',
@@ -245,6 +241,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(
+              width: 40,
+            ),
           ],
         ),
       ],
@@ -252,23 +251,24 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildOutcome() {
-    return const Row(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 75,
-        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Icon(
-              CupertinoIcons.arrow_down_circle_fill,
+            const Icon(
+              CupertinoIcons.arrow_up_circle_fill,
               color: Color.fromRGBO(183, 183, 183, 0.5),
+            ),
+            const SizedBox(
+              width: 5,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   "Outcome",
                   style: TextStyle(
                     fontSize: 16,
@@ -285,8 +285,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "₺1000",
-                  style: TextStyle(
+                  "₺${outcome.toStringAsFixed(2)}",
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Roboto',
@@ -325,7 +325,7 @@ class HomeScreen extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              // Add action here
+              const Text("tıklandı");
             },
             child: const Text(
               "View All",
@@ -384,6 +384,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+double income = 1000000;
+double outcome = 50000;
+double total = income - outcome;
 
 class Transaction {
   final String title;
