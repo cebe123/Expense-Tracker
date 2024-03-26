@@ -1,4 +1,6 @@
 import 'package:expense_tracker/data.dart';
+import 'package:expense_tracker/screens/action.dart';
+import 'package:expense_tracker/screens/history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -6,9 +8,14 @@ double total = income + outcome;
 double income = 0;
 double outcome = 0;
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final totals = _calculateTotals(transactionsData);
@@ -19,11 +26,10 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(),
       body: _buildBody(context, totalIncome, totalOutcome, total),
-      bottomNavigationBar: _buildBottomBar(),
+      bottomNavigationBar: _buildBottomBar(context),
       extendBody: true,
-      floatingActionButton: _buildAction(), // Add FAB here
-      floatingActionButtonLocation: FloatingActionButtonLocation
-          .centerDocked, // Center-align FAB within bottom bar
+      floatingActionButton: _buildAction(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -40,7 +46,7 @@ class HomeScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildAppBarTitleLeft(),
-        _buildAppBarTitleRight(),
+        //_buildAppBarTitleRight(),
       ],
     );
   }
@@ -68,13 +74,13 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.grey[800],
                 ),
               ),
-              const Text(
-                'Username', // Replace with dynamic username
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              // const Text(
+              //   'Username', // Replace with dynamic username
+              //   style: TextStyle(
+              //     fontSize: 16.0,
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
             ],
           ),
         ],
@@ -82,20 +88,19 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBarTitleRight() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        IconButton(
-          icon: const Icon(CupertinoIcons.settings),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
+  // Widget _buildAppBarTitleRight() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.end,
+  //     children: [
+  //       IconButton(
+  //         icon: const Icon(CupertinoIcons.settings),
+  //         onPressed: () {},
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildBody(
-      BuildContext context, double income, double outcome, double total) {
+  Widget _buildBody(BuildContext context, double income, double outcome, double total) {
     return Column(
       children: [
         const SizedBox(height: 15),
@@ -367,9 +372,9 @@ class HomeScreen extends StatelessWidget {
                   double currentAmount =
                       double.parse(transactionsData[i]['totalAmount']);
                   if (currentAmount >= 0) {
-                    income += currentAmount; // Accumulate income
+                    income += currentAmount;
                   } else {
-                    outcome += currentAmount; // Accumulate outcome
+                    outcome += currentAmount;
                   }
                 }
                 return Padding(
@@ -379,8 +384,8 @@ class HomeScreen extends StatelessWidget {
                       Container(
                         width: 50.0,
                         height: 55.0,
-                        decoration: const BoxDecoration(
-                          // color: transactionsData[index]['color'],
+                        decoration: BoxDecoration(
+                          color: transactionsData[index]['color'],
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -395,14 +400,15 @@ class HomeScreen extends StatelessWidget {
                               vertical: double.minPositive),
                           child: Container(
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    blurRadius: 5,
-                                    spreadRadius: 2,
-                                  )
-                                ]),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  blurRadius: 5,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
                             child: ListTile(
                               title: Row(
                                 children: [
@@ -411,23 +417,20 @@ class HomeScreen extends StatelessWidget {
                                       transactionsData[index]['name'],
                                     ),
                                   ),
-                                  const SizedBox(
-                                    width: 150,
-                                  ),
-                                  Text(
-                                    transactionsData[index]['totalAmount'],
-                                    style: TextStyle(
-                                      color: double.parse(
-                                                  transactionsData[index]
-                                                      ['totalAmount']) >=
-                                              0
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                  ),
                                 ],
                               ),
-                              subtitle: Text(transactionsData[index]['date']),
+                              //subtitle: Text(transactionsData[index]['date']),
+                              trailing: Text(
+                                transactionsData[index]['totalAmount'],
+                                style: TextStyle(
+                                  color: double.parse(transactionsData[index]
+                                              ['totalAmount']) >=
+                                          0
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -443,29 +446,50 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(context) {
+    int currentIndex = 0;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(30),
       ),
       child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          elevation: 3,
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.home), label: "Home"),
-            BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.graph_circle_fill), label: "History"),
-          ]),
+        backgroundColor: Colors.white,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        elevation: 3,
+        currentIndex: currentIndex,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.home), label: "Home"),
+          BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.graph_circle_fill), label: "History"),
+        ],
+        onTap: (index) {
+          // Handle navigation based on tapped index
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const History()),
+            );
+          }
+        },
+      ),
     );
   }
 
   Widget _buildAction() {
     return FloatingActionButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const ActionPage(),
+        ));
+      },
       shape: const CircleBorder(),
       child: const Icon(CupertinoIcons.add),
     );
@@ -484,11 +508,4 @@ class HomeScreen extends StatelessWidget {
 
     return Totals(income: income, outcome: outcome);
   }
-}
-
-class Totals {
-  final double income;
-  final double outcome;
-
-  Totals({required this.income, required this.outcome});
 }
