@@ -8,6 +8,7 @@ double total = income + outcome;
 double income = 0;
 double outcome = 0;
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    
     final totals = _calculateTotals(transactionsData);
     final double totalIncome = totals.income;
     final double totalOutcome = totals.outcome;
@@ -100,7 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
   //   );
   // }
 
-  Widget _buildBody(BuildContext context, double income, double outcome, double total) {
+  Widget _buildBody(
+      BuildContext context, double income, double outcome, double total) {
     return Column(
       children: [
         const SizedBox(height: 15),

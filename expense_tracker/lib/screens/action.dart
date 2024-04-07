@@ -1,7 +1,9 @@
 import 'package:expense_tracker/screens/history.dart';
 import 'package:expense_tracker/screens/home.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ActionPage extends StatefulWidget {
   const ActionPage({super.key});
@@ -88,9 +90,62 @@ class _Action extends State<ActionPage> {
   //     ],
   //   );
   // }
-
   Widget _buildBody() {
-    return const Center(child: Text("action"));
+    final TextEditingController controller = TextEditingController();
+    final expensesRef = FirebaseDatabase.instance.ref().child('expenses');
+
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly
+              ],
+              decoration: const InputDecoration(hintText: "Enter the value"),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () async {
+                    final String value = controller.text.trim();
+                    int? integerValue = int.tryParse(value);
+
+                    if (value.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please enter the value')),
+                      );
+                      return;
+                    }
+
+                    if (integerValue == null) {
+                      ErrorHint("Value is not a number");
+                      return;
+                    }
+
+                    final String expenseId =
+                        expensesRef.push().key!; // Generate unique ID
+                    await expensesRef.child(expenseId).set(integerValue);
+
+                    controller.clear();
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Expense added successfully!')),
+                    );
+                  },
+                  child: const Text("Add"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildBottomBar(context) {
@@ -127,6 +182,4 @@ class _Action extends State<ActionPage> {
       ),
     );
   }
-
-
 }
