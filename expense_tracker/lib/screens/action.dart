@@ -1,3 +1,4 @@
+import 'package:expense_tracker/main.dart';
 import 'package:expense_tracker/screens/history.dart';
 import 'package:expense_tracker/screens/home.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -92,7 +93,7 @@ class _Action extends State<ActionPage> {
   // }
   Widget _buildBody() {
     final TextEditingController controller = TextEditingController();
-    final expensesRef = FirebaseDatabase.instance.ref().child('expenses');
+    //final expensesRef = FirebaseDatabase.instance.ref().child('expenses');
 
     return Scaffold(
       body: Center(
@@ -114,7 +115,6 @@ class _Action extends State<ActionPage> {
                   onPressed: () async {
                     final String value = controller.text.trim();
                     int? integerValue = int.tryParse(value);
-
                     if (value.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please enter the value')),
@@ -128,8 +128,8 @@ class _Action extends State<ActionPage> {
                     }
 
                     final String expenseId =
-                        expensesRef.push().key!; // Generate unique ID
-                    await expensesRef.child(expenseId).set(integerValue);
+                        expensesdb.push().key!; // Generate unique ID
+                    await expensesdb.child(expenseId).set(integerValue);
 
                     controller.clear();
                     // ignore: use_build_context_synchronously
