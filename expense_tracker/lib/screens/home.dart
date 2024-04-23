@@ -8,7 +8,6 @@ double total = income + outcome;
 double income = 0;
 double outcome = 0;
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    
     final totals = _calculateTotals(transactionsData);
     final double totalIncome = totals.income;
     final double totalOutcome = totals.outcome;
@@ -478,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const History()),
+              MaterialPageRoute(builder: (context) => History()),
             );
           }
         },
@@ -490,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return FloatingActionButton(
       onPressed: () {
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const ActionPage(),
+          builder: (BuildContext context) => const ActionPage(),
         ));
       },
       shape: const CircleBorder(),

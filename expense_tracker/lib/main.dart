@@ -1,19 +1,30 @@
+import 'package:expense_tracker/screens/action.dart';
 import 'package:expense_tracker/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 FirebaseDatabase database = FirebaseDatabase.instance;
-DatabaseReference categoriesdb = FirebaseDatabase.instance.ref("Categories");
-DatabaseReference expensesdb = FirebaseDatabase.instance.ref("Expenses");
+DatabaseReference categoriesdb =
+    FirebaseDatabase.instance.ref().child('Categories');
+DatabaseReference expensesdb =
+    FirebaseDatabase.instance.ref().child('Expenses');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => DateProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
