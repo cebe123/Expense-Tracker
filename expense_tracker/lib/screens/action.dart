@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ActionPage extends StatefulWidget {
@@ -13,22 +14,13 @@ class ActionPage extends StatefulWidget {
 }
 
 class _Action extends State<ActionPage> {
-  DateTime? selectedDate; // Declare a variable to store the selected date
+  DateTime? selectedDate;
   TextEditingController expenseController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
   int? expenseAmount;
-  late Expense expense;
-  final categoryController = TextEditingController();
-  final List<String> yourCategories = [
-    'Food',
-    'Travel',
-    'Health',
-    'Insurance',
-    'Credit',
-    'Rent',
-    'Interest',
-    'Maintenance',
-  ];
+
+  get selectCategory => CategoryProvider();
 
   @override
   Widget build(BuildContext context) {
@@ -52,134 +44,202 @@ class _Action extends State<ActionPage> {
                 const SizedBox(
                   height: 16,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: TextFormField(
-                    controller: expenseController,
-                    textAlignVertical: TextAlignVertical.center,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly
-                    ],
-                    decoration: InputDecoration(
-                      hintText: "Enter the value",
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      prefixIcon: const Icon(
-                        FontAwesomeIcons.dollarSign,
-                        size: 16,
-                        color: Colors.grey,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      // Capture text input and convert to integer
-                      try {
-                        expenseAmount = int.parse(value);
-                      } on FormatException {
-                        // Handle parsing error (e.g., show a warning to the user)
-                        print('Invalid input: Please enter a number.');
-                        expenseAmount = null; // Reset to null if parsing fails
-                      }
-                    },
-                  ),
-                ),
-
+                _buildInput(),
                 const SizedBox(
                   height: 32,
                 ),
-                TextFormField(
-                  controller: categoryController,
-                  textAlignVertical: TextAlignVertical.center,
-                  readOnly: true,
-                  onTap: () {
-                    CategoryDropdown(
-                      controller: categoryController,
-                      categories: yourCategories,
-                      onSelected: (selectedCategory) {
-                        // Handle category selection here (e.g., navigate to a new screen, perform actions)
-                        print('Selected category: $selectedCategory');
-                      },
-                    );
-                  },
-                  decoration: const InputDecoration(
-                    filled: true,
-                    hintText: 'Category',
-                  ),
-                ),
+                _buildCategory(context),
                 const SizedBox(
                   height: 30,
                 ),
-                TextFormField(
-                  //date
-                  textAlignVertical: TextAlignVertical.center,
-                  readOnly: true,
-                  onTap: () => _selectDate(context),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    prefixIcon: const Icon(
-                      FontAwesomeIcons.clock,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    hintText: 'Date',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none),
-                  ),
-                  initialValue: selectedDate != null
-                      ? DateTime(TimeOfDay.hoursPerPeriod).timeZoneName
-                      : null, // Display placeholder if no date selected
-                ),
+                _buildDate(),
                 const SizedBox(
                   height: 30,
-                ), // Added spacing below the date field
-
-                ElevatedButton(
-                  onPressed: () async {
-                    final String value = expenseController.text.trim();
-                    int? integerValue = int.tryParse(value);
-                    if (value.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please enter the value')),
-                      );
-                      return;
-                    }
-                    if (integerValue == null) {
-                      ErrorHint("Value is not a number");
-                      return;
-                    }
-
-                    try {
-                      final String expenseId =
-                          expensesdb.push().key!; // Generate unique ID
-                      // Set the value of the new child node with expense data and unique ID
-
-                      await expensesdb.child(expenseId).set({
-                        "value": expenseAmount, // Expense value
-                      });
-                      expenseController.clear();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Expense added successfully!')),
-                      );
-                      // Show a success message (optional)
-                    } on FirebaseException catch (e) {
-                      // Handle potential errors during data writing
-                      print(e.message); // Log the error for debugging
-                      // Show an error message to the user
-                    }
-                  },
-                  child: const Text('Save'),
                 ),
+                _buildSave(context),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInput() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.7,
+      child: TextFormField(
+        controller: expenseController,
+        textAlignVertical: TextAlignVertical.center,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly
+        ],
+        decoration: InputDecoration(
+          hintText: "Enter the value",
+          filled: true,
+          fillColor: Colors.grey.shade100,
+          prefixIcon: const Icon(
+            FontAwesomeIcons.dollarSign,
+            size: 16,
+            color: Colors.grey,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        onChanged: (value) {
+          // Capture text input and convert to integer
+          try {
+            expenseAmount = int.parse(value);
+          } on FormatException {
+            // Handle parsing error (e.g., show a warning to the user)
+            const Text('Invalid input: Please enter a number.');
+            expenseAmount = null; // Reset to null if parsing fails
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategory(BuildContext context) {
+    return Consumer<CategoryProvider>(builder: (context, provider, child) {
+      TextEditingController controller = TextEditingController(
+          text: provider.selectedCategory?.name ?? 'Select Category');
+
+      return TextFormField(
+        controller: controller,
+        textAlignVertical: TextAlignVertical.center,
+        readOnly: true,
+        onTap: () => _showCategoryPicker(context, provider),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey.shade100,
+          hintText: 'Select Category',
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(12), bottom: Radius.circular(12)),
+              borderSide: BorderSide.none),
+        ),
+      );
+    });
+  }
+
+  _showCategoryPicker(BuildContext context, CategoryProvider provider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select a Category'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: provider.categories.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(provider.categories[index].name),
+                  onTap: () {
+                    provider.selectCategory(provider.categories[index]);
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDate() {
+    return Consumer<DateProvider>(builder: (context, dateProvider, child) {
+      return TextFormField(
+        // Date input field
+        textAlignVertical: TextAlignVertical.center,
+        readOnly: true,
+        onTap: () => _selectDate(context),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey.shade100,
+          prefixIcon: const Icon(
+            FontAwesomeIcons.clock,
+            size: 16,
+            color: Colors.grey,
+          ),
+          hintText: 'Select Date',
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none),
+        ),
+        controller: TextEditingController(
+            text: dateProvider.selectedDate != null
+                ? DateFormat('dd-MM-yyyy').format(dateProvider.selectedDate!)
+                : ''), // Using a controller to set text
+      );
+    });
+  }
+
+  Widget _buildSave(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        final String value = expenseController.text.trim();
+        int? integerValue = int.tryParse(value);
+        if (value.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please enter the value')),
+          );
+          return;
+        }
+        if (integerValue == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Value is not a number')),
+          );
+          return;
+        }
+
+        // Accessing the selected date and category from their providers
+        final DateTime selectedDate =
+            Provider.of<DateProvider>(context, listen: false).selectedDate;
+        final Category? selectedCategory =
+            Provider.of<CategoryProvider>(context, listen: false)
+                .selectedCategory;
+
+        if (selectedCategory == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a category')),
+          );
+          return;
+        }
+
+        // Formatting date for storage
+        String formattedDate = selectedDate != null
+            ? DateFormat('yyyy-MM-dd').format(selectedDate)
+            : DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+        try {
+          final String expenseId = expensesdb.push().key!; // Generate unique ID
+
+          // Set the value of the new child node with expense data and unique ID
+          await expensesdb.child(expenseId).set({
+            "value": integerValue,
+            "date": formattedDate,
+            "category": selectedCategory.name,
+            // Optionally, store additional category details
+          });
+
+          expenseController.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Expense added successfully!')),
+          );
+        } on FirebaseException catch (e) {
+          // Handle potential errors during data writing
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.message}')),
+          );
+        }
+      },
+      child: const Text('Save'),
     );
   }
 
@@ -199,50 +259,65 @@ class _Action extends State<ActionPage> {
   }
 }
 
-class DateProvider extends ChangeNotifier {
-  DateTime? _selectedDate;
+class Category {
+  String categoryId;
+  String name;
 
-  DateTime? get selectedDate => _selectedDate;
+  Category({
+    required this.categoryId,
+    required this.name,
+  });
 
-  set selectedDate(DateTime? value) {
-    _selectedDate = value;
+  static final empty = Category(categoryId: '', name: '');
+}
+
+class CategoryProvider extends ChangeNotifier {
+  List<Category> categories = [
+    Category(
+      categoryId: '1',
+      name: 'Food',
+    ),
+    Category(
+      categoryId: '2',
+      name: 'Shopping',
+    ),
+    Category(
+      categoryId: '3',
+      name: 'Travel',
+    ),
+    Category(
+      categoryId: '4',
+      name: 'Health',
+    ),
+    Category(
+      categoryId: '5',
+      name: 'Insurance',
+    ),
+    Category(
+      categoryId: '6',
+      name: 'Credit',
+    ),
+    Category(categoryId: '7', name: 'Other'),
+  ];
+
+  Category? selectedCategory;
+
+  void selectCategory(Category category) {
+    selectedCategory = category;
     notifyListeners();
   }
 }
 
-class CategoryDropdown extends StatelessWidget {
-  final TextEditingController controller;
-  final List<String> categories; // List of available category options
-  final void Function(String) onSelected; // Callback for handling selection
+class DateProvider extends ChangeNotifier {
+  DateTime _selectedDate = DateTime.now(); // Default to current date
 
-  const CategoryDropdown({
-    super.key,
-    required this.controller,
-    required this.categories,
-    required this.onSelected,
-  });
+  DateTime get selectedDate => _selectedDate;
 
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      value: controller.text.isEmpty
-          ? null
-          : controller.text, // Pre-select based on controller text
-      items: categories
-          .map((category) => DropdownMenuItem<String>(
-                value: category,
-                child: Text(category),
-              ))
-          .toList(),
-      onChanged: (value) {
-        controller.text = value ?? ''; // Update controller value
-        onSelected(value ?? ''); // Call callback with selected value
-      },
-      decoration: const InputDecoration(
-        filled: true,
-        hintText: 'Category',
-      ),
-    );
+  set selectedDate(DateTime value) {
+    if (_selectedDate != value) {
+      _selectedDate = value;
+      notifyListeners();
+    }
   }
 }
 
@@ -265,23 +340,4 @@ class Expense {
     date: DateTime.now(),
     amount: 0,
   );
-}
-
-class Category {
-  String categoryId;
-  String name;
-  int totalExpenses;
-  String icon;
-  int color;
-
-  Category({
-    required this.categoryId,
-    required this.name,
-    required this.totalExpenses,
-    required this.icon,
-    required this.color,
-  });
-
-  static final empty =
-      Category(categoryId: '', name: '', totalExpenses: 0, icon: '', color: 0);
 }

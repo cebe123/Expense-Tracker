@@ -21,8 +21,11 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => DateProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        //ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }

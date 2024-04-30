@@ -476,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => History()),
+              MaterialPageRoute(builder: (context) => const History()),
             );
           }
         },

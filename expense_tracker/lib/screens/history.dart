@@ -4,7 +4,6 @@ import 'package:expense_tracker/screens/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:provider/provider.dart';
 
 class History extends StatefulWidget {
   const History({super.key});
@@ -26,12 +25,11 @@ class HistoryPage extends State<History> {
   }
 
   Future<void> _fetchData() async {
-    try {
-      DatabaseEvent event = await expensesdb.once();
-      if (event.snapshot.exists) {
+    databaseReference.ref().child('expenses').onValue.listen((event) {
+      if (event.snapshot.value != null) {
         Map<dynamic, dynamic> data =
             Map<dynamic, dynamic>.from(event.snapshot.value as Map);
-        historyItems.clear(); // Clear existing data before adding new items
+         historyItems.clear(); // Clear existing data before adding new items
 
         data.forEach(
           (key, value) {
@@ -41,17 +39,15 @@ class HistoryPage extends State<History> {
                   'id': key,
                   'value': value['value'],
                   'date': value['date'],
+                  'Category': value['Category']
                 },
               );
             }
           },
         );
+        setState(() {}); // Update the UI
       }
-      setState(() {}); // Update UI to reflect changes
-    } catch (error) {
-      print('Error fetching data: $error');
-      // Handle potential errors (e.g., display error message)
-    }
+    });
   }
 
   @override
@@ -134,19 +130,37 @@ class HistoryPage extends State<History> {
   // }
 
   Widget _buildBody() {
-    return historyItems.isNotEmpty
-        ? ListView.builder(
+    return StreamBuilder<DatabaseEvent>(
+      stream: expensesdb.onValue,
+      builder: (context, snapshot) {
+        if (snapshot.hasData &&
+            !snapshot.hasError &&
+            snapshot.data!.snapshot.value != null) {
+          Map<dynamic, dynamic> data =
+              snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+          List historyItems =
+              data.entries.map((e) => {"key": e.key, ...e.value}).toList();
+
+          return ListView.builder(
             itemCount: historyItems.length,
             itemBuilder: (context, index) {
               var item = historyItems[index];
-              return ListTile(
-                //title: Text("Expense ID: ${item['id']}"),
-                title: Text("Amount: ${item['value']}"),
-                subtitle: Text(
-                    "Date: ${context.watch<DateProvider>().selectedDate ?? ''}"),
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  title: Text("Amount: ${item['value']}"),
+                  subtitle: Text(
+                      "Date: ${item['date']} - Category: ${item['category']}"),
+                ),
               );
-            })
-        : const Center(child: Text('No history items found'));
+            },
+          );
+        } else {
+          return const Center(child: Text('No history items found'));
+        }
+      },
+    );
   }
 
   Widget _buildBottomBar(context) {
