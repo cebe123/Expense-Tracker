@@ -48,8 +48,6 @@ List<Map<String, dynamic>> transactionsData = [
   }
 ];
 
-
-
 class Totals {
   final double income;
   final double outcome;

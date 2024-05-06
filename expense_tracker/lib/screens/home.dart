@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  
   Widget build(BuildContext context) {
     final totals = _calculateTotals(transactionsData);
     final double totalIncome = totals.income;
@@ -30,8 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       floatingActionButton: _buildAction(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      
     );
   }
+  
 
   AppBar _buildAppBar() {
     return AppBar(
@@ -469,11 +472,13 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (index) {
           // Handle navigation based on tapped index
           if (index == 0) {
+            Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
           } else if (index == 1) {
+            Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const History()),
@@ -496,10 +501,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   // Function to calculate income and outcome
   Totals _calculateTotals(List<dynamic> transactionsData) {
     double income = 0.0;
     double outcome = 0.0;
+    
 
     for (var transaction in transactionsData) {
       final double amount = double.parse(transaction['totalAmount']);
@@ -509,4 +516,5 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Totals(income: income, outcome: outcome);
   }
+  
 }

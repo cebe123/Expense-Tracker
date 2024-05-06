@@ -14,9 +14,10 @@ class History extends StatefulWidget {
   }
 }
 
+List<Map<String, dynamic>> historyItems = []; // List to store retrieved data
+
 class HistoryPage extends State<History> {
   final databaseReference = FirebaseDatabase.instance;
-  List<Map<String, dynamic>> historyItems = []; // List to store retrieved data
 
   @override
   void initState() {
@@ -24,13 +25,18 @@ class HistoryPage extends State<History> {
     _fetchData(); // Fetch data from database on page load
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchData(); // Fetch data from database when dependencies change
+  }
+
   Future<void> _fetchData() async {
     databaseReference.ref().child('expenses').onValue.listen((event) {
       if (event.snapshot.value != null) {
         Map<dynamic, dynamic> data =
             Map<dynamic, dynamic>.from(event.snapshot.value as Map);
-         historyItems.clear(); // Clear existing data before adding new items
-
+        historyItems.clear(); // Clear existing data before adding new items
         data.forEach(
           (key, value) {
             if (value is Map) {
@@ -39,7 +45,7 @@ class HistoryPage extends State<History> {
                   'id': key,
                   'value': value['value'],
                   'date': value['date'],
-                  'Category': value['Category']
+                  'Category': value['Category'],
                 },
               );
             }
@@ -75,7 +81,6 @@ class HistoryPage extends State<History> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildAppBarTitleLeft(),
-        //_buildAppBarTitleRight(),
       ],
     );
   }
@@ -103,31 +108,12 @@ class HistoryPage extends State<History> {
                   color: Colors.grey[800],
                 ),
               ),
-              // const Text(
-              //   'Username', // Replace with dynamic username
-              //   style: TextStyle(
-              //     fontSize: 16.0,
-              //     fontWeight: FontWeight.w500,
-              //   ),
-              // ),
             ],
           ),
         ],
       ),
     );
   }
-
-  // Widget _buildAppBarTitleRight() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.end,
-  //     children: [
-  //       IconButton(
-  //         icon: const Icon(CupertinoIcons.settings),
-  //         onPressed: () {},
-  //       ),
-  //     ],
-  //   );
-  // }
 
   Widget _buildBody() {
     return StreamBuilder<DatabaseEvent>(
@@ -185,11 +171,13 @@ class HistoryPage extends State<History> {
         onTap: (index) {
           // Handle navigation based on tapped index
           if (index == 0) {
+            Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
           } else if (index == 1) {
+            Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const History()),
