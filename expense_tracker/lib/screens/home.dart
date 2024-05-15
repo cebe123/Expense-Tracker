@@ -1,12 +1,15 @@
-import 'package:expense_tracker/data.dart';
+// ignore_for_file: avoid_print
+import 'dart:math';
+import 'package:expense_tracker/main.dart';
 import 'package:expense_tracker/screens/action.dart';
 import 'package:expense_tracker/screens/history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-double total = income + outcome;
 double income = 0;
 double outcome = 0;
+double total = 0;
+List<dynamic> fetchedData = [];
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,24 +20,67 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
-  
-  Widget build(BuildContext context) {
-    final totals = _calculateTotals(transactionsData);
-    final double totalIncome = totals.income;
-    final double totalOutcome = totals.outcome;
-    final double total = totalIncome - totalOutcome;
+  void initState() {
+    super.initState();
+    _fetchData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      calculate();
+      setState(() {
+        calculate();
+      });
+    });
+  }
 
+  Future<void> _fetchData() async {
+    try {
+      expensesdb.ref.onValue.listen((event) {
+        if (event.snapshot.value != null) {
+          var data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
+          fetchedData = data.values.toList();
+          setState(() {
+            // calculate after fetching data
+            calculate();
+          });
+        } else {
+          const Center(
+            child: Text("$e"),
+          );
+        }
+      });
+    } catch (e) {
+      Center(
+        child: Text("An error occured: $e"),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(context, totalIncome, totalOutcome, total),
+      body: _buildBody(context),
       bottomNavigationBar: _buildBottomBar(context),
       extendBody: true,
       floatingActionButton: _buildAction(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      
     );
   }
-  
+
+  Map<String, double> calculate() {
+    double totalIncome = 0;
+    double totalOutcome = 0;
+    for (int i = 0; i < fetchedData.length; i++) {
+      double currentAmount = double.parse(fetchedData[i]['value'].toString());
+      if (currentAmount >= 0) {
+        totalIncome += currentAmount;
+      } else {
+        totalOutcome += currentAmount;
+      }
+    }
+    total = totalIncome + totalOutcome;
+
+    return {'income': totalIncome, 'outcome': totalOutcome, 'total': total};
+  }
 
   AppBar _buildAppBar() {
     return AppBar(
@@ -91,20 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget _buildAppBarTitleRight() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.end,
-  //     children: [
-  //       IconButton(
-  //         icon: const Icon(CupertinoIcons.settings),
-  //         onPressed: () {},
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  Widget _buildBody(
-      BuildContext context, double income, double outcome, double total) {
+  Widget _buildBody(BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: 15),
@@ -144,9 +177,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        _buildIncome(income),
+                        _buildIncome(),
                         Expanded(
-                          child: _buildOutcome(outcome),
+                          child: _buildOutcome(),
                         ),
                       ],
                     ),
@@ -163,6 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBalance(BuildContext context, double total) {
+    Map<String, double> incomeData = calculate();
+    total = incomeData['total']!;
     return Column(
       children: [
         const Column(
@@ -213,13 +248,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildIncome(double income) {
+  Widget _buildIncome() {
+    Map<String, double> incomeData = calculate();
+    income = incomeData['income']!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const SizedBox(
-          width: 5,
-        ),
+        const SizedBox(width: 5),
         Row(
           children: [
             const Icon(
@@ -265,16 +300,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(
-              width: 40,
-            ),
+            const SizedBox(width: 40),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildOutcome(double outcome) {
+  Widget _buildOutcome() {
+    Map<String, double> incomeData = calculate();
+    outcome = incomeData['outcome']!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -285,9 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
               CupertinoIcons.arrow_up_circle_fill,
               color: Color.fromRGBO(183, 183, 183, 0.5),
             ),
-            const SizedBox(
-              width: 5,
-            ),
+            const SizedBox(width: 5),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -333,6 +366,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTransactions(BuildContext context) {
+    // Kategorilere göre simgelerin eşleştirildiği bir harita oluştur
+    Map<String, IconData> categoryIcons = {
+      'Food': Icons.fastfood,
+      'Transportation': Icons.directions_car,
+      'Shopping': Icons.shopping_cart,
+      'Health': Icons.health_and_safety,
+      'Travel': Icons.card_travel,
+      'Insurance': Icons.accessibility,
+      'Credit': Icons.credit_card,
+      'Other': Icons.error,
+    };
+
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20),
       child: Column(
@@ -351,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  const Text("clicked");
+                  // Handle view all action
                 },
                 child: const Text(
                   "View All",
@@ -369,18 +414,18 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 350,
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: transactionsData.length,
+              itemCount: fetchedData.length,
               physics: const AlwaysScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                for (int i = 0; i < transactionsData.length; i++) {
-                  double currentAmount =
-                      double.parse(transactionsData[i]['totalAmount']);
-                  if (currentAmount >= 0) {
-                    income += currentAmount;
-                  } else {
-                    outcome += currentAmount;
-                  }
-                }
+                double currentAmount =
+                    double.parse(fetchedData[index]['value'].toString());
+                Color itemColor =
+                    currentAmount >= 0 ? Colors.green : Colors.red;
+                IconData itemIcon = categoryIcons[fetchedData[index]
+                        ['category']] ??
+                    Icons
+                        .category; // Eğer kategoriye uygun bir simge yoksa varsayılan bir simge kullan
+
                 return Padding(
                   padding: const EdgeInsets.all(6.0),
                   child: Row(
@@ -389,15 +434,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: 50.0,
                         height: 55.0,
                         decoration: BoxDecoration(
-                          color: transactionsData[index]['color'],
+                          color: itemColor,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
-                          child: transactionsData[index]['icon'],
+                          child: Icon(itemIcon),
                         ),
                       ),
-                      const SizedBox(
-                          width: 10.0), // Add spacing between circle and text
+                      const SizedBox(width: 10.0),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsetsDirectional.symmetric(
@@ -418,22 +462,31 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      transactionsData[index]['name'],
+                                      fetchedData[index]['category'].toString(),
                                     ),
                                   ),
                                 ],
                               ),
-                              //subtitle: Text(transactionsData[index]['date']),
-                              trailing: Text(
-                                transactionsData[index]['totalAmount'],
-                                style: TextStyle(
-                                  color: double.parse(transactionsData[index]
-                                              ['totalAmount']) >=
-                                          0
-                                      ? Colors.green
-                                      : Colors.red,
-                                  fontSize: 16,
-                                ),
+                              subtitle: Text(fetchedData[index]['date']),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    fetchedData[index]['value'].toString(),
+                                    style: TextStyle(
+                                      color: itemColor,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Category Total: ₺${fetchedData[index]['categoryTotal'].toString()}",
+                                    style: TextStyle(
+                                      color: itemColor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -471,6 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         onTap: (index) {
           // Handle navigation based on tapped index
+
           if (index == 0) {
             Navigator.pop(context);
             Navigator.push(
@@ -481,7 +535,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const History()),
+              MaterialPageRoute(builder: (context) => const HistoryPage()),
             );
           }
         },
@@ -500,21 +554,4 @@ class _HomeScreenState extends State<HomeScreen> {
       child: const Icon(CupertinoIcons.add),
     );
   }
-
-
-  // Function to calculate income and outcome
-  Totals _calculateTotals(List<dynamic> transactionsData) {
-    double income = 0.0;
-    double outcome = 0.0;
-    
-
-    for (var transaction in transactionsData) {
-      final double amount = double.parse(transaction['totalAmount']);
-      income += amount >= 0 ? amount : 0;
-      outcome += amount < 0 ? amount.abs() : 0;
-    }
-
-    return Totals(income: income, outcome: outcome);
-  }
-  
 }

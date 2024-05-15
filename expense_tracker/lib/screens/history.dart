@@ -5,57 +5,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class History extends StatefulWidget {
-  const History({super.key});
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    return HistoryPage();
-  }
+  State<StatefulWidget> createState() => _HistoryPageState();
 }
 
-List<Map<String, dynamic>> historyItems = []; // List to store retrieved data
-
-class HistoryPage extends State<History> {
-  final databaseReference = FirebaseDatabase.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchData(); // Fetch data from database on page load
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fetchData(); // Fetch data from database when dependencies change
-  }
-
-  Future<void> _fetchData() async {
-    databaseReference.ref().child('expenses').onValue.listen((event) {
-      if (event.snapshot.value != null) {
-        Map<dynamic, dynamic> data =
-            Map<dynamic, dynamic>.from(event.snapshot.value as Map);
-        historyItems.clear(); // Clear existing data before adding new items
-        data.forEach(
-          (key, value) {
-            if (value is Map) {
-              historyItems.add(
-                {
-                  'id': key,
-                  'value': value['value'],
-                  'date': value['date'],
-                  'Category': value['Category'],
-                },
-              );
-            }
-          },
-        );
-        setState(() {}); // Update the UI
-      }
-    });
-  }
-
+class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,6 +22,60 @@ class HistoryPage extends State<History> {
       extendBody: true,
       floatingActionButton: _buildAction(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildBody() {
+    return FutureBuilder<DataSnapshot>(
+      future: expensesdb.once().then((event) => event.snapshot),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.value == null) {
+          return const Center(child: Text('No history items found'));
+        } else {
+          Map<dynamic, dynamic> data =
+              snapshot.data!.value as Map<dynamic, dynamic>;
+          var newHistoryItems =
+              data.entries.map((e) => {"key": e.key, ...e.value}).toList();
+          return ListView.builder(
+            itemCount: newHistoryItems.length,
+            itemBuilder: (context, index) {
+              var item = newHistoryItems[index];
+              Color itemColor = item['value'] >= 0 ? Colors.green : Colors.red;
+              IconData iconData = item['value'] >= 0
+                  ? Icons.arrow_drop_down
+                  : Icons.arrow_drop_up;
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  leading: Icon(iconData, color: itemColor),
+                  title: Text("Amount: ${item['value']}",
+                      style: TextStyle(color: itemColor)),
+                  subtitle: Text(
+                      "Date: ${item['date']}   -   Category: ${item['category']}",
+                      style: TextStyle(color: itemColor)),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      if (item['key'] != null) {
+                        expensesdb.child(item['key']).remove().then((_) {
+                          setState(() {
+                            newHistoryItems.removeAt(index);
+                          });
+                        });
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      },
     );
   }
 
@@ -115,40 +126,6 @@ class HistoryPage extends State<History> {
     );
   }
 
-  Widget _buildBody() {
-    return StreamBuilder<DatabaseEvent>(
-      stream: expensesdb.onValue,
-      builder: (context, snapshot) {
-        if (snapshot.hasData &&
-            !snapshot.hasError &&
-            snapshot.data!.snapshot.value != null) {
-          Map<dynamic, dynamic> data =
-              snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-          List historyItems =
-              data.entries.map((e) => {"key": e.key, ...e.value}).toList();
-
-          return ListView.builder(
-            itemCount: historyItems.length,
-            itemBuilder: (context, index) {
-              var item = historyItems[index];
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: ListTile(
-                  title: Text("Amount: ${item['value']}"),
-                  subtitle: Text(
-                      "Date: ${item['date']} - Category: ${item['category']}"),
-                ),
-              );
-            },
-          );
-        } else {
-          return const Center(child: Text('No history items found'));
-        }
-      },
-    );
-  }
-
   Widget _buildBottomBar(context) {
     int currentIndex = 1;
     return ClipRRect(
@@ -175,12 +152,6 @@ class HistoryPage extends State<History> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          } else if (index == 1) {
-            Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const History()),
             );
           }
         },

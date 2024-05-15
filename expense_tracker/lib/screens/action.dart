@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison, use_build_context_synchronously, avoid_print
+
 import 'package:expense_tracker/main.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -70,9 +72,10 @@ class _Action extends State<ActionPage> {
       width: MediaQuery.of(context).size.width * 0.7,
       child: TextFormField(
         controller: expenseController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlignVertical: TextAlignVertical.center,
         inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly
+          FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d{0,2}')),
         ],
         decoration: InputDecoration(
           hintText: "Enter the value",
@@ -89,12 +92,12 @@ class _Action extends State<ActionPage> {
           ),
         ),
         onChanged: (value) {
-          // Capture text input and convert to integer
+          // Capture text input and convert to double
           try {
-            expenseAmount = int.parse(value);
+            expenseAmount = double.parse(value) as int?;
           } on FormatException {
             // Handle parsing error (e.g., show a warning to the user)
-            const Text('Invalid input: Please enter a number.');
+            const Text('Invalid input: Please enter a valid number.');
             expenseAmount = null; // Reset to null if parsing fails
           }
         },
@@ -104,8 +107,15 @@ class _Action extends State<ActionPage> {
 
   Widget _buildCategory(BuildContext context) {
     return Consumer<CategoryProvider>(builder: (context, provider, child) {
-      TextEditingController controller = TextEditingController(
-          text: provider.selectedCategory?.name ?? 'Select Category');
+      String selectedCategoryName = provider.selectedCategory?.name ?? '';
+
+      // If no category is selected, default to the first category
+      if (selectedCategoryName.isEmpty && provider.categories.isNotEmpty) {
+        provider.selectCategory(provider.categories.first);
+      }
+
+      TextEditingController controller =
+          TextEditingController(text: selectedCategoryName);
 
       return TextFormField(
         controller: controller,
@@ -174,7 +184,7 @@ class _Action extends State<ActionPage> {
         ),
         controller: TextEditingController(
             text: dateProvider.selectedDate != null
-                ? DateFormat('dd-MM-yyyy').format(dateProvider.selectedDate!)
+                ? DateFormat('dd-MM-yyyy').format(dateProvider.selectedDate)
                 : ''), // Using a controller to set text
       );
     });
@@ -218,6 +228,11 @@ class _Action extends State<ActionPage> {
             : DateFormat('yyyy-MM-dd').format(DateTime.now());
 
         try {
+          // Disable the button to prevent multiple clicks during saving
+          setState(() {
+            //_isSaving = true;
+          });
+
           final String expenseId = expensesdb.push().key!; // Generate unique ID
 
           // Set the value of the new child node with expense data and unique ID
@@ -237,6 +252,11 @@ class _Action extends State<ActionPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error: ${e.message}')),
           );
+        } finally {
+          // Re-enable the button after saving is completed
+          setState(() {
+            // _isSaving = false;
+          });
         }
       },
       child: const Text('Save'),
@@ -246,8 +266,9 @@ class _Action extends State<ActionPage> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: context.read<DateProvider>().selectedDate ??
-          DateTime.now(), // Use selectedDate if available, otherwise use today
+      initialDate: context
+          .read<DateProvider>()
+          .selectedDate, // Use selectedDate if available, otherwise use today
       firstDate: DateTime(2024, 1, 1),
       lastDate: DateTime(2040, 12, 31),
     );
