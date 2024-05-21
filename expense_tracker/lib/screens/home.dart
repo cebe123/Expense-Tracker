@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_print
 import 'dart:math';
 import 'package:expense_tracker/main.dart';
 import 'package:expense_tracker/screens/action.dart';
@@ -69,8 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, double> calculate() {
     double totalIncome = 0;
     double totalOutcome = 0;
+
     for (int i = 0; i < fetchedData.length; i++) {
       double currentAmount = double.parse(fetchedData[i]['value'].toString());
+
       if (currentAmount >= 0) {
         totalIncome += currentAmount;
       } else {
@@ -79,7 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     total = totalIncome + totalOutcome;
 
-    return {'income': totalIncome, 'outcome': totalOutcome, 'total': total};
+    return {
+      'income': totalIncome,
+      'outcome': totalOutcome,
+      'total': total,
+    };
   }
 
   AppBar _buildAppBar() {
@@ -366,7 +371,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTransactions(BuildContext context) {
-    // Kategorilere göre simgelerin eşleştirildiği bir harita oluştur
     Map<String, IconData> categoryIcons = {
       'Food': Icons.fastfood,
       'Transportation': Icons.directions_car,
@@ -377,6 +381,23 @@ class _HomeScreenState extends State<HomeScreen> {
       'Credit': Icons.credit_card,
       'Other': Icons.error,
     };
+    // Check if fetchedData is loaded
+    if (fetchedData.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    Map<String, double> categoryTotals = {};
+    for (var expense in fetchedData) {
+      String category = expense['category'];
+      double amount = double.parse(expense['value'].toString());
+
+      if (categoryTotals.containsKey(category)) {
+        categoryTotals[category] = categoryTotals[category]! + amount;
+      } else {
+        categoryTotals[category] = amount;
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20),
@@ -396,7 +417,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  // Handle view all action
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HistoryPage()));
                 },
                 child: const Text(
                   "View All",
@@ -414,18 +438,13 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 350,
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: fetchedData.length,
+              itemCount: categoryTotals.length,
               physics: const AlwaysScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                double currentAmount =
-                    double.parse(fetchedData[index]['value'].toString());
-                Color itemColor =
-                    currentAmount >= 0 ? Colors.green : Colors.red;
-                IconData itemIcon = categoryIcons[fetchedData[index]
-                        ['category']] ??
-                    Icons
-                        .category; // Eğer kategoriye uygun bir simge yoksa varsayılan bir simge kullan
-
+                String category = categoryTotals.keys.elementAt(index);
+                double totalAmount = categoryTotals[category]!;
+                Color itemColor = totalAmount >= 0 ? Colors.green : Colors.red;
+                IconData itemIcon = categoryIcons[category] ?? Icons.category;
                 return Padding(
                   padding: const EdgeInsets.all(6.0),
                   child: Row(
@@ -458,32 +477,18 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                             child: ListTile(
-                              title: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      fetchedData[index]['category'].toString(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              subtitle: Text(fetchedData[index]['date']),
+                              title: Text(category),
+                              subtitle: Text(
+                                  "Last Operation: ${fetchedData[index]['date']}"),
                               trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    fetchedData[index]['value'].toString(),
+                                    "₺${totalAmount.toStringAsFixed(2)}",
                                     style: TextStyle(
                                       color: itemColor,
                                       fontSize: 16,
-                                    ),
-                                  ),
-                                  Text(
-                                    "Category Total: ₺${fetchedData[index]['categoryTotal'].toString()}",
-                                    style: TextStyle(
-                                      color: itemColor,
-                                      fontSize: 12,
                                     ),
                                   ),
                                 ],
