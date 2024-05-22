@@ -224,15 +224,10 @@ class _Action extends State<ActionPage> {
 
         // Formatting date for storage
         String formattedDate = selectedDate != null
-            ? DateFormat('yyyy-MM-dd').format(selectedDate)
-            : DateFormat('yyyy-MM-dd').format(DateTime.now());
+            ? DateFormat('dd-MM-yyyy').format(selectedDate)
+            : DateFormat('dd-MM-yyyy').format(DateTime.now());
 
         try {
-          // Disable the button to prevent multiple clicks during saving
-          setState(() {
-            //_isSaving = true;
-          });
-
           final String expenseId = expensesdb.push().key!; // Generate unique ID
 
           // Set the value of the new child node with expense data and unique ID
@@ -240,7 +235,6 @@ class _Action extends State<ActionPage> {
             "value": integerValue,
             "date": formattedDate,
             "category": selectedCategory.name,
-            // Optionally, store additional category details
           });
 
           expenseController.clear();
@@ -254,9 +248,7 @@ class _Action extends State<ActionPage> {
           );
         } finally {
           // Re-enable the button after saving is completed
-          setState(() {
-            // _isSaving = false;
-          });
+          setState(() {});
         }
       },
       child: const Text('Save'),

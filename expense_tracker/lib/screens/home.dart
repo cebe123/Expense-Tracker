@@ -4,6 +4,7 @@ import 'package:expense_tracker/screens/action.dart';
 import 'package:expense_tracker/screens/history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 double income = 0;
 double outcome = 0;
@@ -381,12 +382,14 @@ class _HomeScreenState extends State<HomeScreen> {
       'Credit': Icons.credit_card,
       'Other': Icons.error,
     };
+
     // Check if fetchedData is loaded
     if (fetchedData.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     }
+
     Map<String, double> categoryTotals = {};
     for (var expense in fetchedData) {
       String category = expense['category'];
@@ -417,10 +420,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               GestureDetector(
                 onTap: () {
+                  Navigator.pop(context);
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HistoryPage()));
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HistoryPage(),
+                    ),
+                  );
                 },
                 child: const Text(
                   "View All",
@@ -447,57 +453,95 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconData itemIcon = categoryIcons[category] ?? Icons.category;
                 return Padding(
                   padding: const EdgeInsets.all(6.0),
-                  child: Row(
-                    children: [
-                      Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 3,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      leading: Container(
                         width: 50.0,
-                        height: 55.0,
+                        height: 50.0,
                         decoration: BoxDecoration(
-                          color: itemColor,
-                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: itemColor == Colors.green
+                                ? [Colors.green.shade300, Colors.green.shade600]
+                                : [Colors.red.shade300, Colors.red.shade600],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: itemColor == Colors.green
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
+                              offset: const Offset(0, 3),
+                              blurRadius: 3,
+                              spreadRadius: -2,
+                            ),
+                          ],
                         ),
                         child: Center(
-                          child: Icon(itemIcon),
+                          child: Icon(itemIcon, color: Colors.white),
                         ),
                       ),
-                      const SizedBox(width: 10.0),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.symmetric(
-                              vertical: double.minPositive),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 5,
-                                  spreadRadius: 2,
+                      title: Text(
+                        category,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              offset: Offset(3, 8),
+                              blurRadius: 1.5,
+                            ),
+                          ],
+                        ),
+                      ),
+                      subtitle: Text(
+                        "Last Operation : ${DateFormat('dd MMM yyyy').format(DateTime.parse(fetchedData[index]['date']))}",
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              offset: Offset(3, 8),
+                              blurRadius: 1.5,
+                            ),
+                          ],
+                        ),
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "₺${totalAmount.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: CupertinoColors.darkBackgroundGray,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(3, 8),
+                                  blurRadius: 1.5,
                                 ),
                               ],
                             ),
-                            child: ListTile(
-                              title: Text(category),
-                              subtitle: Text(
-                                  "Last Operation: ${fetchedData[index]['date']}"),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "₺${totalAmount.toStringAsFixed(2)}",
-                                    style: TextStyle(
-                                      color: itemColor,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 );
               },
