@@ -17,9 +17,19 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   @override
+  void initState() {
+    super.initState();
+    // Listen for refresh signal from other pages
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ModalRoute.of(context)?.settings.arguments as bool? ?? false) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
       body: _buildBody(),
       bottomNavigationBar: _buildBottomBar(context),
       extendBody: true,
@@ -50,9 +60,11 @@ class _HistoryPageState extends State<HistoryPage> {
               Color itemColor = item['value'] >= 0 ? Colors.green : Colors.red;
               IconData iconData = item['value'] >= 0
                   ? CupertinoIcons.arrow_up_circle_fill
-                  : CupertinoIcons.arrow_down_circle_fill;             
-              DateTime date = DateTime.parse(item['date']);
-              String formattedDate = DateFormat('dd MMM yyyy').format(date);
+                  : CupertinoIcons.arrow_down_circle_fill;
+              DateTime date = DateFormat('dd-MM-yyyy').parse(item['date']);
+
+              String formattedDate = DateFormat('dd-MM-yyyy').format(date);
+
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -94,7 +106,7 @@ class _HistoryPageState extends State<HistoryPage> {
                       child: Icon(iconData, color: itemColor.withOpacity(0.9)),
                     ),
                     title: Text(
-                      "Amount: ${item['value']}",
+                      "Amount: ₺${item['value']}",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -142,13 +154,40 @@ class _HistoryPageState extends State<HistoryPage> {
                         child: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.white),
                           onPressed: () {
-                            if (item['key'] != null) {
-                              expensesdb.child(item['key']).remove().then((_) {
-                                setState(() {
-                                  newHistoryItems.removeAt(index);
-                                });
-                              });
-                            }
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Delete Confirmation"),
+                                  content: const Text(
+                                      "Are you sure you want to delete this item?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text("Cancel"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text("Delete"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        if (item['key'] != null) {
+                                          expensesdb
+                                              .child(item['key'])
+                                              .remove()
+                                              .then((_) {
+                                            setState(() {
+                                              newHistoryItems.removeAt(index);
+                                            });
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           },
                         ),
                       ),
@@ -160,53 +199,6 @@ class _HistoryPageState extends State<HistoryPage> {
           );
         }
       },
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.grey[200],
-      toolbarHeight: 60,
-      title: _buildAppBarTitle(),
-    );
-  }
-
-  Widget _buildAppBarTitle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildAppBarTitleLeft(),
-      ],
-    );
-  }
-
-  Widget _buildAppBarTitleLeft() {
-    return SafeArea(
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            radius: 20.0,
-            child: Icon(
-              Icons.person_3_sharp,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(width: 13.0),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome',
-                style: TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -237,6 +229,8 @@ class _HistoryPageState extends State<HistoryPage> {
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
+          } else if (index == 1) {
+            Navigator.pop(context, true); // Signal for refresh
           }
         },
       ),

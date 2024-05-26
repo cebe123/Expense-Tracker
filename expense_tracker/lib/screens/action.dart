@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_null_comparison, use_build_context_synchronously, avoid_print
+// ignore_for_file: unnecessary_null_comparison, use_build_context_synchronously
 
 import 'package:expense_tracker/main.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,13 +16,26 @@ class ActionPage extends StatefulWidget {
 }
 
 class _Action extends State<ActionPage> {
+  late FocusNode _focusNode;
   DateTime? selectedDate;
   TextEditingController expenseController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
-  int? expenseAmount;
+  double? expenseAmount;
 
   get selectCategory => CategoryProvider();
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,11 +84,12 @@ class _Action extends State<ActionPage> {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.7,
       child: TextFormField(
+        focusNode: _focusNode,
         controller: expenseController,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlignVertical: TextAlignVertical.center,
         inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d{0,2}')),
+          FilteringTextInputFormatter.allow(RegExp(r'^-?\d+\.?\d{0,2}')),
         ],
         decoration: InputDecoration(
           hintText: "Enter the value",
@@ -94,7 +108,7 @@ class _Action extends State<ActionPage> {
         onChanged: (value) {
           // Capture text input and convert to double
           try {
-            expenseAmount = double.parse(value) as int?;
+            expenseAmount = double.parse(value);
           } on FormatException {
             // Handle parsing error (e.g., show a warning to the user)
             const Text('Invalid input: Please enter a valid number.');
@@ -107,7 +121,11 @@ class _Action extends State<ActionPage> {
 
   Widget _buildCategory(BuildContext context) {
     return Consumer<CategoryProvider>(builder: (context, provider, child) {
+      String firstCategoryName =
+          provider.categories.isNotEmpty ? provider.categories.first.name : '';
+
       String selectedCategoryName = provider.selectedCategory?.name ?? '';
+      String hintText = 'Select Category (e.g. $firstCategoryName))';
 
       // If no category is selected, default to the first category
       if (selectedCategoryName.isEmpty && provider.categories.isNotEmpty) {
@@ -125,11 +143,14 @@ class _Action extends State<ActionPage> {
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.grey.shade100,
-          hintText: 'Select Category',
+          hintText: hintText,
           border: const OutlineInputBorder(
               borderRadius: BorderRadius.vertical(
                   top: Radius.circular(12), bottom: Radius.circular(12)),
               borderSide: BorderSide.none),
+        ),
+        style: TextStyle(
+          color: Colors.grey.withOpacity(0.5),
         ),
       );
     });
@@ -184,7 +205,7 @@ class _Action extends State<ActionPage> {
         ),
         controller: TextEditingController(
             text: dateProvider.selectedDate != null
-                ? DateFormat('dd-MM-yyyy').format(dateProvider.selectedDate)
+                ? DateFormat('dd MMMM yyyy').format(dateProvider.selectedDate)
                 : ''), // Using a controller to set text
       );
     });
@@ -194,7 +215,7 @@ class _Action extends State<ActionPage> {
     return ElevatedButton(
       onPressed: () async {
         final String value = expenseController.text.trim();
-        int? integerValue = int.tryParse(value);
+        double? integerValue = double.tryParse(value);
         if (value.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please enter the value')),
@@ -248,7 +269,9 @@ class _Action extends State<ActionPage> {
           );
         } finally {
           // Re-enable the button after saving is completed
-          setState(() {});
+          setState(() {
+            expenseController.clear();
+          });
         }
       },
       child: const Text('Save'),
@@ -261,13 +284,12 @@ class _Action extends State<ActionPage> {
       initialDate: context
           .read<DateProvider>()
           .selectedDate, // Use selectedDate if available, otherwise use today
-      firstDate: DateTime(2024, 1, 1),
-      lastDate: DateTime(2040, 12, 31),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2040),
     );
     if (pickedDate != null &&
         pickedDate != context.read<DateProvider>().selectedDate) {
       context.read<DateProvider>().selectedDate = pickedDate;
-      print(context.read<DateProvider>().selectedDate);
     }
   }
 }
