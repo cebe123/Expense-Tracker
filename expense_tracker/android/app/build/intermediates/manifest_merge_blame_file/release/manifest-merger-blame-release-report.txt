@@ -1,0 +1,288 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.expense_tracker"
+4    android:versionCode="1"
+5    android:versionName="0.2.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="19"
+8-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml
+9        android:targetSdkVersion="33" />
+9-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+11-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:2:5-80
+11-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:2:22-78
+12    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+12-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:3:5-79
+12-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:3:22-77
+13    <!--
+14         Required to query activities that can process text, see:
+15         https://developer.android.com/training/package-visibility?hl=en and
+16         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+17
+18         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin.
+19    -->
+20    <queries>
+20-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:41:5-46:15
+21        <intent>
+21-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:42:9-45:18
+22            <action android:name="android.intent.action.PROCESS_TEXT" />
+22-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:43:13-72
+22-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:43:21-70
+23
+24            <data android:mimeType="text/plain" />
+24-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:44:13-50
+24-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:44:19-48
+25        </intent>
+26    </queries>
+27
+28    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+28-->[:connectivity_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\connectivity_plus-6.0.3\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:9:5-79
+28-->[:connectivity_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\connectivity_plus-6.0.3\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:9:22-76
+29    <uses-permission android:name="android.permission.INTERNET" />
+29-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:23:5-67
+29-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:23:22-64
+30
+31    <permission
+31-->[androidx.core:core:1.12.0] C:\Users\Adnan\.gradle\caches\transforms-3\291d7d560c15312666904e19bc6144f2\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+32        android:name="com.example.expense_tracker.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+32-->[androidx.core:core:1.12.0] C:\Users\Adnan\.gradle\caches\transforms-3\291d7d560c15312666904e19bc6144f2\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+33        android:protectionLevel="signature" />
+33-->[androidx.core:core:1.12.0] C:\Users\Adnan\.gradle\caches\transforms-3\291d7d560c15312666904e19bc6144f2\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+34
+35    <uses-permission android:name="com.example.expense_tracker.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+35-->[androidx.core:core:1.12.0] C:\Users\Adnan\.gradle\caches\transforms-3\291d7d560c15312666904e19bc6144f2\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+35-->[androidx.core:core:1.12.0] C:\Users\Adnan\.gradle\caches\transforms-3\291d7d560c15312666904e19bc6144f2\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+36
+37    <application
+38        android:name="android.app.Application"
+38-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:7:9-42
+39        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+39-->[androidx.core:core:1.12.0] C:\Users\Adnan\.gradle\caches\transforms-3\291d7d560c15312666904e19bc6144f2\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+40        android:icon="@mipmap/ic_launcher"
+40-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:8:9-43
+41        android:label="expense_tracker"
+41-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:6:9-40
+42        android:requestLegacyExternalStorage="true" >
+42-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:5:5-48
+43        <activity
+43-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:9:9-29:20
+44            android:name="com.example.expense_tracker.MainActivity"
+44-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:10:13-41
+45            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+45-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:14:13-163
+46            android:exported="true"
+46-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:11:13-36
+47            android:hardwareAccelerated="true"
+47-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:15:13-47
+48            android:launchMode="singleTop"
+48-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:12:13-43
+49            android:theme="@style/LaunchTheme"
+49-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:13:13-47
+50            android:windowSoftInputMode="adjustResize" >
+50-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:16:13-55
+51
+52            <!--
+53                 Specifies an Android theme to apply to this Activity as soon as
+54                 the Android process has started. This theme is visible to the user
+55                 while the Flutter UI initializes. After that, this theme continues
+56                 to determine the Window background behind the Flutter UI.
+57            -->
+58            <meta-data
+58-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:21:13-24:17
+59                android:name="io.flutter.embedding.android.NormalTheme"
+59-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:22:15-70
+60                android:resource="@style/NormalTheme" />
+60-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:23:15-52
+61
+62            <intent-filter>
+62-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:25:13-28:29
+63                <action android:name="android.intent.action.MAIN" />
+63-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:26:17-68
+63-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:26:25-66
+64
+65                <category android:name="android.intent.category.LAUNCHER" />
+65-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:27:17-76
+65-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:27:27-74
+66            </intent-filter>
+67        </activity>
+68        <!--
+69             Don't delete the meta-data below.
+70             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+71        -->
+72        <meta-data
+72-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:32:9-34:33
+73            android:name="flutterEmbedding"
+73-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:33:13-44
+74            android:value="2" />
+74-->C:\Users\Adnan\Desktop\ExpenseTracker\expense_tracker\android\app\src\main\AndroidManifest.xml:34:13-30
+75
+76        <service
+76-->[:firebase_database] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_database-10.5.6\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:10:9-14:19
+77            android:name="com.google.firebase.components.ComponentDiscoveryService"
+77-->[:firebase_database] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_database-10.5.6\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:10:18-89
+78            android:directBootAware="true"
+78-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:32:13-43
+79            android:exported="false" >
+79-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:28:13-37
+80            <meta-data
+80-->[:firebase_database] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_database-10.5.6\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:11:13-13:85
+81                android:name="com.google.firebase.components:io.flutter.plugins.firebase.database.FlutterFirebaseAppRegistrar"
+81-->[:firebase_database] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_database-10.5.6\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:12:17-127
+82                android:value="com.google.firebase.components.ComponentRegistrar" />
+82-->[:firebase_database] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_database-10.5.6\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:13:17-82
+83            <meta-data
+83-->[:firebase_core] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-2.31.1\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:11:13-13:85
+84                android:name="com.google.firebase.components:io.flutter.plugins.firebase.core.FlutterFirebaseCoreRegistrar"
+84-->[:firebase_core] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-2.31.1\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:12:17-124
+85                android:value="com.google.firebase.components.ComponentRegistrar" />
+85-->[:firebase_core] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-2.31.1\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:13:17-82
+86            <meta-data
+86-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:29:13-31:85
+87                android:name="com.google.firebase.components:com.google.firebase.database.FirebaseDatabaseKtxRegistrar"
+87-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:30:17-120
+88                android:value="com.google.firebase.components.ComponentRegistrar" />
+88-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:31:17-82
+89            <meta-data
+89-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:32:13-34:85
+90                android:name="com.google.firebase.components:com.google.firebase.database.DatabaseRegistrar"
+90-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:33:17-109
+91                android:value="com.google.firebase.components.ComponentRegistrar" />
+91-->[com.google.firebase:firebase-database:20.3.1] C:\Users\Adnan\.gradle\caches\transforms-3\8106524070a6eb01dcb18e6939d5aae6\transformed\jetified-firebase-database-20.3.1\AndroidManifest.xml:34:17-82
+92            <meta-data
+92-->[com.google.firebase:firebase-common-ktx:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\fffc057a6cb0b6f572b2471b1b13b1ba\transformed\jetified-firebase-common-ktx-20.4.3\AndroidManifest.xml:12:13-14:85
+93                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+93-->[com.google.firebase:firebase-common-ktx:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\fffc057a6cb0b6f572b2471b1b13b1ba\transformed\jetified-firebase-common-ktx-20.4.3\AndroidManifest.xml:13:17-116
+94                android:value="com.google.firebase.components.ComponentRegistrar" />
+94-->[com.google.firebase:firebase-common-ktx:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\fffc057a6cb0b6f572b2471b1b13b1ba\transformed\jetified-firebase-common-ktx-20.4.3\AndroidManifest.xml:14:17-82
+95            <meta-data
+95-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:35:13-37:85
+96                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+96-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:36:17-109
+97                android:value="com.google.firebase.components.ComponentRegistrar" />
+97-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:37:17-82
+98        </service>
+99
+100        <provider
+100-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:11:9-20:20
+101            android:name="com.crazecoder.openfile.FileProvider"
+101-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:12:13-64
+102            android:authorities="com.example.expense_tracker.fileProvider.com.crazecoder.openfile"
+102-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:13:13-88
+103            android:exported="false"
+103-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:14:13-37
+104            android:grantUriPermissions="true" >
+104-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:15:13-47
+105            <meta-data
+105-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:17:13-19:53
+106                android:name="android.support.FILE_PROVIDER_PATHS"
+106-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:18:17-67
+107                android:resource="@xml/filepaths" />
+107-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:19:17-50
+108        </provider>
+109        <!--
+110           Declares a provider which allows us to store files to share in
+111           '.../caches/share_plus' and grant the receiving action access
+112        -->
+113        <provider
+113-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:15:9-23:20
+114            android:name="dev.fluttercommunity.plus.share.ShareFileProvider"
+114-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:16:13-77
+115            android:authorities="com.example.expense_tracker.flutter.share_provider"
+115-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:17:13-74
+116            android:exported="false"
+116-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:18:13-37
+117            android:grantUriPermissions="true" >
+117-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:19:13-47
+118            <meta-data
+118-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:17:13-19:53
+119                android:name="android.support.FILE_PROVIDER_PATHS"
+119-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:18:17-67
+120                android:resource="@xml/flutter_share_file_paths" />
+120-->[:open_file] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\open_file-3.3.2\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:19:17-50
+121        </provider>
+122        <!--
+123           This manifest declared broadcast receiver allows us to use an explicit
+124           Intent when creating a PendingItent to be informed of the user's choice
+125        -->
+126        <receiver
+126-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:28:9-34:20
+127            android:name="dev.fluttercommunity.plus.share.SharePlusPendingIntent"
+127-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:29:13-82
+128            android:exported="false" >
+128-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:30:13-37
+129            <intent-filter>
+129-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:31:13-33:29
+130                <action android:name="EXTRA_CHOSEN_COMPONENT" />
+130-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:32:17-65
+130-->[:share_plus] C:\Users\Adnan\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-9.0.0\android\build\intermediates\merged_manifest\release\AndroidManifest.xml:32:25-62
+131            </intent-filter>
+132        </receiver>
+133
+134        <provider
+134-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:23:9-28:39
+135            android:name="com.google.firebase.provider.FirebaseInitProvider"
+135-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:24:13-77
+136            android:authorities="com.example.expense_tracker.firebaseinitprovider"
+136-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:25:13-72
+137            android:directBootAware="true"
+137-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:26:13-43
+138            android:exported="false"
+138-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:27:13-37
+139            android:initOrder="100" />
+139-->[com.google.firebase:firebase-common:20.4.3] C:\Users\Adnan\.gradle\caches\transforms-3\bcb484bc3f3fb00dc0fd482d8ed7fc42\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:28:13-36
+140
+141        <uses-library
+141-->[androidx.window:window:1.0.0-beta04] C:\Users\Adnan\.gradle\caches\transforms-3\ce6da2123b8e057fcf6d434434be665c\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:25:9-27:40
+142            android:name="androidx.window.extensions"
+142-->[androidx.window:window:1.0.0-beta04] C:\Users\Adnan\.gradle\caches\transforms-3\ce6da2123b8e057fcf6d434434be665c\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:26:13-54
+143            android:required="false" />
+143-->[androidx.window:window:1.0.0-beta04] C:\Users\Adnan\.gradle\caches\transforms-3\ce6da2123b8e057fcf6d434434be665c\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:27:13-37
+144        <uses-library
+144-->[androidx.window:window:1.0.0-beta04] C:\Users\Adnan\.gradle\caches\transforms-3\ce6da2123b8e057fcf6d434434be665c\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:28:9-30:40
+145            android:name="androidx.window.sidecar"
+145-->[androidx.window:window:1.0.0-beta04] C:\Users\Adnan\.gradle\caches\transforms-3\ce6da2123b8e057fcf6d434434be665c\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:29:13-51
+146            android:required="false" />
+146-->[androidx.window:window:1.0.0-beta04] C:\Users\Adnan\.gradle\caches\transforms-3\ce6da2123b8e057fcf6d434434be665c\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:30:13-37
+147
+148        <activity
+148-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\Adnan\.gradle\caches\transforms-3\bf1b3046c3078983c21a4b9ac9a36360\transformed\jetified-play-services-base-18.1.0\AndroidManifest.xml:20:9-22:45
+149            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+149-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\Adnan\.gradle\caches\transforms-3\bf1b3046c3078983c21a4b9ac9a36360\transformed\jetified-play-services-base-18.1.0\AndroidManifest.xml:20:19-85
+150            android:exported="false"
+150-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\Adnan\.gradle\caches\transforms-3\bf1b3046c3078983c21a4b9ac9a36360\transformed\jetified-play-services-base-18.1.0\AndroidManifest.xml:22:19-43
+151            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+151-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\Adnan\.gradle\caches\transforms-3\bf1b3046c3078983c21a4b9ac9a36360\transformed\jetified-play-services-base-18.1.0\AndroidManifest.xml:21:19-78
+152
+153        <meta-data
+153-->[com.google.android.gms:play-services-basement:18.3.0] C:\Users\Adnan\.gradle\caches\transforms-3\1adbc3a6a2a0cfec3cc6dc3b66347f0f\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:21:9-23:69
+154            android:name="com.google.android.gms.version"
+154-->[com.google.android.gms:play-services-basement:18.3.0] C:\Users\Adnan\.gradle\caches\transforms-3\1adbc3a6a2a0cfec3cc6dc3b66347f0f\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:22:13-58
+155            android:value="@integer/google_play_services_version" />
+155-->[com.google.android.gms:play-services-basement:18.3.0] C:\Users\Adnan\.gradle\caches\transforms-3\1adbc3a6a2a0cfec3cc6dc3b66347f0f\transformed\jetified-play-services-basement-18.3.0\AndroidManifest.xml:23:13-66
+156
+157        <provider
+157-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+158            android:name="androidx.startup.InitializationProvider"
+158-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+159            android:authorities="com.example.expense_tracker.androidx-startup"
+159-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+160            android:exported="false" >
+160-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+161            <meta-data
+161-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+162                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+162-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+163                android:value="androidx.startup" />
+163-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Adnan\.gradle\caches\transforms-3\bcbbdaed629afe49c7514351a42398ac\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+164            <meta-data
+164-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\Adnan\.gradle\caches\transforms-3\267e50d669639be26887fe83ba4caa4f\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+165                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+165-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\Adnan\.gradle\caches\transforms-3\267e50d669639be26887fe83ba4caa4f\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+166                android:value="androidx.startup" />
+166-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\Adnan\.gradle\caches\transforms-3\267e50d669639be26887fe83ba4caa4f\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+167        </provider>
+168    </application>
+169
+170</manifest>

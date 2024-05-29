@@ -3,6 +3,7 @@
 import 'package:expense_tracker/main.dart';
 import 'package:expense_tracker/screens/action.dart';
 import 'package:expense_tracker/screens/history.dart';
+import 'package:expense_tracker/screens/settings.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchData() async {
     try {
+      // Listening to changes in the database
       expensesdb.ref.onValue.listen((event) {
         if (event.snapshot.value != null) {
           var data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
@@ -45,21 +47,45 @@ class _HomeScreenState extends State<HomeScreen> {
             calculate();
           });
         } else {
-          const Center(
-            child: Text("No data available"),
-          );
+          // Handle the case when no data is available
+          setState(() {
+            fetchedData = [];
+          });
         }
       });
     } catch (e) {
-      Center(
-        child: Text("An error occurred: $e"),
-      );
+      // Handle any errors that occur during data fetching
+      Text("An error occurred: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize:
+            const Size.fromHeight(30.0), // Set the height of the AppBar
+        child: AppBar(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              iconSize: 24,
+              onPressed: () {
+                // Convert fetchedData to List<Map<String, dynamic>> before passing
+                List<Map<String, dynamic>> data = fetchedData
+                    .map((item) => Map<String, dynamic>.from(item))
+                    .toList();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(fetchedData: data),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: _buildBody(context),
       bottomNavigationBar: _buildBottomBar(context),
       extendBody: true,
@@ -74,14 +100,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (int i = 0; i < fetchedData.length; i++) {
       double currentAmount = double.parse(fetchedData[i]['value'].toString());
+      String category = fetchedData[i]['category'];
 
-      if (currentAmount >= 0) {
+      if (category == 'Income') {
         totalIncome += currentAmount;
       } else {
         totalOutcome += currentAmount;
       }
     }
-    total = totalIncome + totalOutcome;
+    total = totalIncome - totalOutcome; // Total balance calculation
 
     return {
       'income': totalIncome,
@@ -91,60 +118,62 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 15),
-        Center(
-          child: Container(
-            // Gradient Box
-            height: 200,
-            width: 300,
-            constraints: const BoxConstraints(maxHeight: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: const Color.fromRGBO(82, 78, 199, 0.937),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 5,
-                  spreadRadius: 0.5,
-                  offset: Offset(5, 5),
-                )
-              ],
-              gradient: const LinearGradient(
-                transform: GradientRotation(30),
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Colors.purple, Colors.blue],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 15),
+          Center(
+            child: Container(
+              // Gradient Box
+              height: 200,
+              width: 300,
+              constraints: const BoxConstraints(maxHeight: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: const Color.fromRGBO(82, 78, 199, 0.937),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 5,
+                    spreadRadius: 0.5,
+                    offset: Offset(5, 5),
+                  )
+                ],
+                gradient: const LinearGradient(
+                  transform: GradientRotation(30),
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [Colors.purple, Colors.blue],
+                ),
+              ),
+              child: Column(
+                children: <Widget>[
+                  _buildBalance(context, total),
+                  const SizedBox(
+                    height: 50,
+                    width: 10,
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          _buildIncome(),
+                          Expanded(
+                            child: _buildOutcome(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            child: Column(
-              children: <Widget>[
-                _buildBalance(context, total),
-                const SizedBox(
-                  height: 50,
-                  width: 10,
-                ),
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        _buildIncome(),
-                        Expanded(
-                          child: _buildOutcome(),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
-        ),
-        const SizedBox(height: 25),
-        _buildTransactions(context),
-      ],
+          const SizedBox(height: 25),
+          _buildTransactions(context),
+        ],
+      ),
     );
   }
 
@@ -320,6 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTransactions(BuildContext context) {
     Map<String, IconData> categoryIcons = {
+      'Income': CupertinoIcons.money_dollar,
       'Food': Icons.fastfood,
       'Transportation': Icons.directions_car,
       'Shopping': Icons.shopping_cart,
@@ -333,7 +363,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // Check if fetchedData is loaded
     if (fetchedData.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child: Center(
+          child: Text("Not Found !"),
+        ),
       );
     }
 
@@ -387,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           SizedBox(
-            height: 350,
+            height: MediaQuery.of(context).size.height - 300,
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: categoryTotals.length,
@@ -399,7 +431,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 String category = categoryTotals.keys.elementAt(index);
                 double totalAmount = categoryTotals[category]!;
-                Color itemColor = totalAmount >= 0 ? Colors.green : Colors.red;
+                Color itemColor =
+                    category == 'Income' ? Colors.green : Colors.red;
                 IconData itemIcon = categoryIcons[category] ?? Icons.category;
 
                 return GestureDetector(
@@ -411,8 +444,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFDE1E1), Color(0xFFF8C3C3)],
+                        gradient: LinearGradient(
+                          colors: category == 'Income'
+                              ? [Colors.green.shade200, Colors.green.shade400]
+                              : [
+                                  const Color(0xFFFDE1E1),
+                                  const Color(0xFFF8C3C3)
+                                ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -430,17 +468,24 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 50.0,
                           height: 50.0,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFF7A1A1), Color(0xFFF76E6E)],
+                            gradient: LinearGradient(
+                              colors: category == 'Income'
+                                  ? [
+                                      Colors.green.shade300,
+                                      Colors.green.shade600
+                                    ]
+                                  : [Colors.red.shade300, Colors.red.shade600],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(25),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.red.withOpacity(0.5),
-                                blurRadius: 5,
-                                offset: const Offset(0, 3),
+                                color: category == 'Income'
+                                    ? Colors.green.withOpacity(0.9)
+                                    : Colors.red.withOpacity(0.9),
+                                blurRadius: 8,
+                                offset: const Offset(0, 5),
                               ),
                             ],
                           ),
@@ -455,24 +500,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             shadows: [
                               Shadow(
                                 color: Colors.black26,
-                                offset: Offset(3, 8),
-                                blurRadius: 1.5,
+                                offset: Offset(2, 5),
+                                blurRadius: 2,
                               ),
                             ],
                           ),
                         ),
                         subtitle: Text(
-                          "Last Operation : $formattedDate",
+                          "Last Operation :\n $formattedDate",
                           style: const TextStyle(
-                            color: Colors.grey,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                offset: Offset(3, 8),
-                                blurRadius: 1.5,
-                              ),
-                            ],
-                          ),
+                              color: Colors.black54, fontSize: 14),
                         ),
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -487,8 +524,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 shadows: [
                                   Shadow(
                                     color: Colors.black26,
-                                    offset: Offset(3, 8),
-                                    blurRadius: 1.5,
+                                    offset: Offset(2, 5),
+                                    blurRadius: 2,
                                   ),
                                 ],
                               ),
@@ -533,10 +570,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: newHistoryItems.length,
                     itemBuilder: (context, index) {
                       var item = newHistoryItems[index];
-                      Color itemColor =
-                          item['value'] >= 0 ? Colors.green : Colors.red;
-                      IconData iconData = item['value'] >= 0
-                          ? CupertinoIcons.arrow_up_circle_fill
+                      Color itemColor = item['category'] == 'Income'
+                          ? Colors.green
+                          : Colors.red;
+                      IconData iconData = item['category'] == 'Income'
+                          ? CupertinoIcons.money_dollar
                           : CupertinoIcons.arrow_down_circle_fill;
                       DateTime date =
                           DateFormat('dd-MM-yyyy').parse(item['date']);
@@ -546,7 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Card(
                         elevation: 2,
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                            horizontal: 25, vertical: 5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -561,8 +599,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 offset: const Offset(0, 3),
                               ),
                             ],
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFDE1E1), Color(0xFFF8C3C3)],
+                            gradient: LinearGradient(
+                              colors: item['category'] == 'Income'
+                                  ? [
+                                      Colors.green.shade300,
+                                      Colors.green.shade600
+                                    ]
+                                  : [
+                                      const Color(0xFFFDE1E1),
+                                      const Color(0xFFF8C3C3)
+                                    ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -573,17 +619,24 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: 50,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(25),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFF7A1A1),
-                                    Color(0xFFF76E6E)
-                                  ],
+                                gradient: LinearGradient(
+                                  colors: item['category'] == 'Income'
+                                      ? [
+                                          Colors.green.shade300,
+                                          Colors.green.shade600
+                                        ]
+                                      : [
+                                          const Color(0xFFF7A1A1),
+                                          const Color(0xFFF76E6E)
+                                        ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.red.withOpacity(0.5),
+                                    color: item['category'] == 'Income'
+                                        ? Colors.green.withOpacity(0.5)
+                                        : Colors.red.withOpacity(0.5),
                                     blurRadius: 5,
                                     offset: const Offset(0, 3),
                                   ),
@@ -604,33 +657,44 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Shadow(
                                     color: Colors.black26,
                                     offset: Offset(3, 8),
-                                    blurRadius: 1.5,
+                                    blurRadius: 3,
                                   ),
                                 ],
                               ),
                             ),
-                            subtitle: Text(
-                              "Date: $formattedDate   -   Category: ${item['category']}",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w300,
-                                fontFamily: 'Roboto',
-                                color: CupertinoColors.white,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black26,
-                                    offset: Offset(3, 8),
-                                    blurRadius: 1.5,
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Date: $formattedDate   -   Category: ${item['category']}",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Roboto',
+                                    color: Colors.black87,
                                   ),
-                                ],
-                              ),
+                                ),
+                                if (item['description'] != null &&
+                                    item['description'].toString().isNotEmpty)
+                                  Text(
+                                    item['description'],
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Roboto',
+                                      color: CupertinoColors.systemGrey,
+                                    ),
+                                  ),
+                              ],
                             ),
                             trailing: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
+                                    color: Colors.grey.withOpacity(0.4),
                                     spreadRadius: 2,
                                     blurRadius: 5,
                                     offset: const Offset(0, 3),
@@ -672,7 +736,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           .removeAt(index);
                                                     });
                                                     setState(() {
-                                                      // Optional: If you want to update the main list as well
+                                                      fetchedData.removeWhere(
+                                                          (element) =>
+                                                              element['key'] ==
+                                                              item['key']);
                                                     });
                                                   });
                                                 }
@@ -707,17 +774,25 @@ class _HomeScreenState extends State<HomeScreen> {
         top: Radius.circular(30),
       ),
       child: BottomNavigationBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.shade200, // Light metallic grey background
         showSelectedLabels: false,
         showUnselectedLabels: false,
         elevation: 3,
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home), label: "Home"),
+            icon: Icon(CupertinoIcons.home, color: Colors.grey.shade700),
+            activeIcon: Icon(CupertinoIcons.home, color: Colors.grey.shade900),
+            label: "Home",
+          ),
           BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.graph_circle_fill), label: "History"),
+            icon: Icon(CupertinoIcons.graph_circle_fill,
+                color: Colors.grey.shade700),
+            activeIcon: Icon(CupertinoIcons.graph_circle_fill,
+                color: Colors.grey.shade900),
+            label: "History",
+          ),
         ],
         onTap: (index) {
           // Handle navigation based on tapped index

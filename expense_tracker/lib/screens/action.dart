@@ -2,6 +2,7 @@
 
 import 'package:expense_tracker/main.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,9 +22,11 @@ class _Action extends State<ActionPage> {
   TextEditingController expenseController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
   double? expenseAmount;
 
   get selectCategory => CategoryProvider();
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +67,10 @@ class _Action extends State<ActionPage> {
                   height: 32,
                 ),
                 _buildCategory(context),
+                const SizedBox(
+                  height: 30,
+                ),
+                _buildDescription(),
                 const SizedBox(
                   height: 30,
                 ),
@@ -125,7 +132,7 @@ class _Action extends State<ActionPage> {
           provider.categories.isNotEmpty ? provider.categories.first.name : '';
 
       String selectedCategoryName = provider.selectedCategory?.name ?? '';
-      String hintText = 'Select Category (e.g. $firstCategoryName))';
+      String hintText = 'Select Category (e.g. $firstCategoryName)';
 
       // If no category is selected, default to the first category
       if (selectedCategoryName.isEmpty && provider.categories.isNotEmpty) {
@@ -156,28 +163,105 @@ class _Action extends State<ActionPage> {
     });
   }
 
-  _showCategoryPicker(BuildContext context, CategoryProvider provider) {
-    showDialog(
+  Widget _buildDescription() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 1,
+      child: TextFormField(
+        controller: descriptionController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: "Enter a description (optional)",
+          filled: true,
+          fillColor: Colors.grey.shade100,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCategoryPicker(BuildContext context, CategoryProvider provider) {
+    showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return CupertinoActionSheet(
           title: const Text('Select a Category'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: provider.categories.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text(provider.categories[index].name),
-                  onTap: () {
-                    provider.selectCategory(provider.categories[index]);
-                    Navigator.pop(context);
-                  },
-                );
+          actions:
+              List<Widget>.generate(provider.categories.length, (int index) {
+            return CupertinoActionSheetAction(
+              child: Text(provider.categories[index].name),
+              onPressed: () {
+                if (provider.categories[index].name == 'Other >') {
+                  Navigator.pop(context);
+                  _showNewCategoryDialog(context, provider);
+                } else {
+                  provider.selectCategory(provider.categories[index]);
+                  Navigator.pop(context);
+                }
+              },
+            );
+          }),
+          cancelButton: CupertinoActionSheetAction(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showNewCategoryDialog(BuildContext context, CategoryProvider provider) {
+    TextEditingController newCategoryController = TextEditingController();
+
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Add New Category'),
+          content: CupertinoTextField(
+            controller: newCategoryController,
+            placeholder: 'Enter category name',
+          ),
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
-          ),
+            CupertinoDialogAction(
+              child: const Text('Add'),
+              onPressed: () {
+                String newCategoryName = newCategoryController.text.trim();
+                if (newCategoryName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Category name cannot be empty')),
+                  );
+                  return;
+                }
+                if (provider.categories.any((category) =>
+                    category.name.toLowerCase() ==
+                    newCategoryName.toLowerCase())) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Category already exists')),
+                  );
+                  return;
+                }
+
+                provider.addCategory(Category(
+                  categoryId: DateTime.now().millisecondsSinceEpoch.toString(),
+                  name: newCategoryName,
+                ));
+                provider.selectCategory(provider.categories.last);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
     );
@@ -215,6 +299,7 @@ class _Action extends State<ActionPage> {
     return ElevatedButton(
       onPressed: () async {
         final String value = expenseController.text.trim();
+        final String description = descriptionController.text.trim();
         double? integerValue = double.tryParse(value);
         if (value.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -256,9 +341,11 @@ class _Action extends State<ActionPage> {
             "value": integerValue,
             "date": formattedDate,
             "category": selectedCategory.name,
+            "description": description, // Add description to the database
           });
 
           expenseController.clear();
+          descriptionController.clear(); // Clear description field
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Expense added successfully!')),
           );
@@ -271,6 +358,7 @@ class _Action extends State<ActionPage> {
           // Re-enable the button after saving is completed
           setState(() {
             expenseController.clear();
+            descriptionController.clear(); // Clear description field
           });
         }
       },
@@ -332,13 +420,25 @@ class CategoryProvider extends ChangeNotifier {
       categoryId: '6',
       name: 'Credit',
     ),
-    Category(categoryId: '7', name: 'Other'),
+    Category(
+      categoryId: '7',
+      name: 'Income',
+    ),
+    Category(
+      categoryId: '8',
+      name: 'Other >',
+    ),
   ];
 
   Category? selectedCategory;
 
   void selectCategory(Category category) {
     selectedCategory = category;
+    notifyListeners();
+  }
+
+  void addCategory(Category category) {
+    categories.add(category);
     notifyListeners();
   }
 }
