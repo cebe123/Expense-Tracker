@@ -1,9 +1,10 @@
 import 'package:expense_tracker/main.dart';
 import 'package:expense_tracker/screens/action.dart';
 import 'package:expense_tracker/screens/home.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -13,15 +14,178 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  String selectedMonth = DateFormat('MMMM').format(DateTime.now());
+  int selectedYear = DateTime.now().year;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for refresh signal from other pages
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ModalRoute.of(context)?.settings.arguments as bool? ?? false) {
+        setState(() {});
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: Padding(
+        padding: const EdgeInsets.only(top: 50, left: 15, right: 15),
+        child: Column(
+          children: [
+            _buildYearStrip(),
+            _buildMonthStrip(),
+            Expanded(child: _buildBody()),
+          ],
+        ),
+      ),
       bottomNavigationBar: _buildBottomBar(context),
       extendBody: true,
       floatingActionButton: _buildAction(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildYearStrip() {
+    List<int> years = List.generate(10, (index) => DateTime.now().year - index);
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.only(top: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: years.map((year) {
+            bool isSelected = year == selectedYear;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedYear = year;
+                });
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  gradient: isSelected
+                      ? const LinearGradient(
+                          colors: [Colors.blueAccent, Colors.lightBlueAccent],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : LinearGradient(
+                          colors: [Colors.grey.shade300, Colors.grey.shade400],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Colors.blueAccent.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(2, 4),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.4),
+                            blurRadius: 4,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                ),
+                child: Center(
+                  child: Text(
+                    year.toString(),
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontFamily: 'SF Pro Text',
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthStrip() {
+    List<String> months = List.generate(12, (index) {
+      return DateFormat('MMMM').format(DateTime(0, index + 1));
+    });
+
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.only(top: 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: months.map((month) {
+            bool isSelected = month == selectedMonth;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedMonth = month;
+                });
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  gradient: isSelected
+                      ? const LinearGradient(
+                          colors: [Colors.blueAccent, Colors.lightBlueAccent],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : LinearGradient(
+                          colors: [Colors.grey.shade300, Colors.grey.shade400],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Colors.blueAccent.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(2, 4),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.4),
+                            blurRadius: 4,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                ),
+                child: Center(
+                  child: Text(
+                    month,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontFamily: 'SF Pro Text',
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
@@ -40,89 +204,207 @@ class _HistoryPageState extends State<HistoryPage> {
               snapshot.data!.value as Map<dynamic, dynamic>;
           var newHistoryItems =
               data.entries.map((e) => {"key": e.key, ...e.value}).toList();
+
+          // Filter items by selected month and year
+          newHistoryItems = newHistoryItems.where((item) {
+            DateTime date = DateFormat('dd-MM-yyyy').parse(item['date']);
+            return DateFormat('MMMM').format(date) == selectedMonth &&
+                date.year == selectedYear;
+          }).toList();
+
+          // Group items by date
+          Map<String, List<Map<dynamic, dynamic>>> groupedItems = {};
+          for (var item in newHistoryItems) {
+            DateTime date = DateFormat('dd-MM-yyyy').parse(item['date']);
+            String formattedDate = DateFormat('dd MMMM').format(date);
+
+            if (groupedItems.containsKey(formattedDate)) {
+              groupedItems[formattedDate]!.add(item);
+            } else {
+              groupedItems[formattedDate] = [item];
+            }
+          }
+
+          // Sort dates from newest to oldest
+          var sortedDates = groupedItems.keys.toList()
+            ..sort((a, b) => DateFormat('dd MMMM')
+                .parse(b)
+                .compareTo(DateFormat('dd MMMM').parse(a)));
+
           return ListView.builder(
-            itemCount: newHistoryItems.length,
+            itemCount: sortedDates.length,
             itemBuilder: (context, index) {
-              var item = newHistoryItems[index];
-              Color itemColor = item['value'] >= 0 ? Colors.green : Colors.red;
-              IconData iconData = item['value'] >= 0
-                  ? Icons.arrow_drop_down
-                  : Icons.arrow_drop_up;
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: ListTile(
-                  leading: Icon(iconData, color: itemColor),
-                  title: Text("Amount: ${item['value']}",
-                      style: TextStyle(color: itemColor)),
-                  subtitle: Text(
-                      "Date: ${item['date']}   -   Category: ${item['category']}",
-                      style: TextStyle(color: itemColor)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      if (item['key'] != null) {
-                        expensesdb.child(item['key']).remove().then((_) {
-                          setState(() {
-                            newHistoryItems.removeAt(index);
-                          });
-                        });
-                      }
-                    },
+              String date = sortedDates[index];
+              List<Map<dynamic, dynamic>> items = groupedItems[date]!;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
+                    child: Text(
+                      date,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.withOpacity(0.6),
+                        fontFamily: 'Cupertino',
+                      ),
+                    ),
                   ),
-                ),
+                  ...items.map((item) {
+                    bool isIncome = item['category'] == 'Income';
+                    Color itemColor = isIncome ? Colors.green : Colors.red;
+                    IconData iconData = isIncome
+                        ? CupertinoIcons.arrow_up_circle_fill
+                        : CupertinoIcons.arrow_down_circle_fill;
+                    DateTime itemDate =
+                        DateFormat('dd-MM-yyyy').parse(item['date']);
+                    String formattedItemDate =
+                        DateFormat('dd-MM-yyyy').format(itemDate);
+
+                    return Card(
+                      elevation: 2,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                          gradient: LinearGradient(
+                            colors: isIncome
+                                ? [Colors.green.shade300, Colors.green.shade600]
+                                : [Colors.red.shade100, Colors.red.shade300],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: ListTile(
+                          leading: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: Icon(iconData,
+                                color: itemColor.withOpacity(0.9)),
+                          ),
+                          title: Text(
+                            "Amount: ₺${item['value']}",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Roboto',
+                              color: CupertinoColors.darkBackgroundGray,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(3, 8),
+                                  blurRadius: 1.5,
+                                ),
+                              ],
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Date: $formattedItemDate   -   Category: ${item['category']}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w300,
+                              fontFamily: 'Roboto',
+                              color: CupertinoColors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(3, 8),
+                                  blurRadius: 1.5,
+                                ),
+                              ],
+                            ),
+                          ),
+                          trailing: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black26,
+                              child: IconButton(
+                                icon: const Icon(CupertinoIcons.delete,
+                                    color: Colors.white),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title:
+                                            const Text("Delete Confirmation"),
+                                        content: const Text(
+                                            "Are you sure you want to delete this item?"),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text("Cancel"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text("Delete"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              if (item['key'] != null) {
+                                                expensesdb
+                                                    .child(item['key'])
+                                                    .remove()
+                                                    .then((_) {
+                                                  setState(() {
+                                                    items.remove(item);
+                                                  });
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
               );
             },
           );
         }
       },
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.grey[200],
-      toolbarHeight: 60,
-      title: _buildAppBarTitle(),
-    );
-  }
-
-  Widget _buildAppBarTitle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildAppBarTitleLeft(),
-      ],
-    );
-  }
-
-  Widget _buildAppBarTitleLeft() {
-    return SafeArea(
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            radius: 20.0,
-            child: Icon(
-              Icons.person_3_sharp,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(width: 13.0),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome',
-                style: TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -153,6 +435,8 @@ class _HistoryPageState extends State<HistoryPage> {
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
+          } else if (index == 1) {
+            Navigator.pop(context, true); // Signal for refresh
           }
         },
       ),
